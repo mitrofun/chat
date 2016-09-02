@@ -1,4 +1,4 @@
-# drugofilter
+# chat
 
 Educational application to create chat on NodeJS
 
