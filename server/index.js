@@ -16,8 +16,10 @@ let webSocketServer = new WebSocketServer.Server({
 webSocketServer.on('connection', function(ws) {
 
     connection.push(ws);
-    console.log(ws);
-    console.log(connection.length);
+    
+    ws.on('test', function (val) {
+        console.log(val);
+    });
 
     let id = Math.random();
     clients[id] = ws;
@@ -25,11 +27,26 @@ webSocketServer.on('connection', function(ws) {
     console.log("new connection " + id);
 
     ws.on('message', function(message) {
+        
+        console.log(message.data);
+        
         console.log('add message ' + message);
 
-        for (let key in clients) {
-          clients[key].send(message);
+        let msg = JSON.parse(message);
+
+        switch(msg.type) {
+
+            case "login":
+                console.log(msg);
+                break;
+
+            case "message":
+                for (let key in clients) {
+                    clients[key].send(message);
+                }
+                break;
         }
+
     });
 
     ws.on('close', function() {
