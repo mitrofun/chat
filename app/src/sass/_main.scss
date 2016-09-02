@@ -1,0 +1,119 @@
+@import "variables";
+@import "compass";
+
+body {
+  overflow: hidden;
+}
+
+.sidebar {
+  background: $orange;
+  height: 100vh;
+}
+
+.messages {
+  overflow: auto;
+  height: calc(100vh - 65px);
+}
+
+
+.message {
+  padding: 5px;
+}
+
+.sender__left,
+.sender__right {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.sender__right {
+  margin-left: 5px;
+}
+
+.photo__link {
+  @include border-radius(50%);
+  overflow: hidden;
+  width: 60px;
+  height: 60px;
+}
+
+.message__top {
+  margin-bottom: 5px;
+}
+
+.sender__name,
+.message__time {
+  display: inline-block;
+}
+
+.sender__text{
+  font-family: "FiraSansRegular", Arial, sans-serif;
+}
+
+.message__time {
+  font-family: "FiraSansRegular", Arial, sans-serif;
+  color: $light-black;
+}
+
+.form__send {
+ margin-top: 15px;
+}
+
+.input__text,
+.input__message {
+  outline: none;
+  @include border-radius(8px);
+  border: 1px solid $gray;
+  width: 90%;
+  margin-bottom: 14px;
+  padding: 6px 14px;
+  font-size: 15px;
+  font-family: "FiraSansRegular", Arial, sans-serif;
+  color: $dark-grey;
+
+  @include breakpoint( $phone-p ){
+    width: 70%;
+  }
+  @include breakpoint( $phone-l ){
+    width: 80%;
+  }
+  @include breakpoint( $tab-l ){
+    width: 86%;
+  }
+  @include breakpoint( $desk ){
+    width: 90%;
+  }
+
+  &:hover,
+  &:focus {
+      border: 1px solid #ff8663;
+  }
+
+  &_block {
+    display: block;
+    width: 100%;
+  }
+}
+
+.input__submit {
+  outline: none;
+  padding: 6px 15px;
+  border: 1px solid transparent;
+  @include border-radius(8px);
+  color: $white;
+  background: $orange;
+  font-size: 15px;
+  font-family: "FiraSansRegular", Arial, sans-serif;
+
+  &:hover {
+    background:$white;
+    color: $orange;
+    border: 1px solid $orange;
+  }
+
+  &_block {
+    display: block;
+    width: 100%;
+  }
+
+}

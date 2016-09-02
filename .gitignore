@@ -1,3 +1,6 @@
 # Created by .ignore support plugin (hsz.mobi)
-/node_modules/
-/src/css/
+/server/node_modules/
+/app/node_modules/
+/app/dist/
+/app/src/css/
+/app/.sass-cache/

@@ -1,0 +1,13 @@
+@import "variables";
+@import "compass";
+
+.login {
+  min-height: 100%;
+}
+
+.panel__login {
+  border: 1px solid $gray;
+  padding: 15px;
+  @include border-radius(8px);
+  transform: translateY(100%);
+}

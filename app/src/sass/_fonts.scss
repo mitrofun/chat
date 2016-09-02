@@ -1,0 +1,7 @@
+/* ----- fonts ----- */
+
+@import "compass/css3/font-face";
+
+@include font-face("FiraSansLight", font-files("FiraSans-Light.woff", "FiraSans-Light.ttf"), "FiraSans-Light.eot");
+@include font-face("FiraSansRegular", font-files("FiraSans-Regular.woff", "FiraSans-Regular.ttf"), "FiraSans-Regular.eot");
+@include font-face("FiraSansMedium", font-files("FiraSans-Medium.woff", "FiraSans-Medium.ttf"), "FiraSans-Medium.eot");
