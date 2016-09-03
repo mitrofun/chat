@@ -6,8 +6,8 @@ let WebSocketServer = new require('ws');
 
 let users = {};
 let messages = [];
-// let connection = [];
 let clients = {};
+let loginClients = {};
 
 let webSocketServer = new WebSocketServer.Server({
   port: 8081
@@ -21,37 +21,57 @@ function Msg(type, session, user, text ) {
     this.datetime = new Date();
 }
 
-function addLoggedUser(user, socket) {
+function addLoggedUser(user, socket, id) {
     users[user.login] = user;
     socket.user = user.login;
+    loginClients[id] = socket;
+}
+
+function removeLogoutUser(user, id) {
+    delete users[user];
+    delete clients[id];
+    delete loginClients[id];
 }
 
 function sendMessage(socket, message) {
-    socket.send(JSON.stringify(message));
+    if (typeof message === 'string') {
+        socket.send(message);
+    } else {
+        socket.send(JSON.stringify(message));
+    }
+
 }
 
 
 function loginUser(user, sessionId, socket) {
     let msg;
+    let result = false;
 
     if (!(user.login in users)) {
-
-        addLoggedUser(user, socket);
+        addLoggedUser(user, socket, sessionId);
         msg = new Msg('enter-ok', sessionId, user, `Hi, ${user.name}!`);
-
+        result = true
     } else {
         msg = new Msg('enter-error', sessionId, false, `current user is already in chat!`);
     }
     sendMessage(socket, msg);
+    return result;
 }
 
 function addMessage(message) {
     messages.push(message);
 }
 
+function sendArchiveMessages(socket) {
+
+    messages.forEach((message) => {
+        sendMessage(socket, message)
+    })
+
+}
+
 webSocketServer.on('connection', function(ws) {
 
-    // connection.push(ws);
     let id = Math.random();
     clients[id] = ws;
 
@@ -68,15 +88,18 @@ webSocketServer.on('connection', function(ws) {
             // login
             case "login":
 
-                loginUser(msg.user, id, clients[id]);
-                // get photo
+                if (loginUser(msg.user, id, clients[id])) {
+                     // get photo
+
+                    sendArchiveMessages(clients[id]);
+                }
                 break;
 
             // send message
             case "message":
 
-                for (let key in clients) {
-                    clients[key].send(message);
+                for (let key in loginClients) {
+                    loginClients[key].send(message);
                 }
                 addMessage(message);
                 break;
@@ -85,12 +108,8 @@ webSocketServer.on('connection', function(ws) {
     });
 
     ws.on('close', function() {
-
         console.log('connection close ' + id);
-
-        delete users[ws.user];
-        delete clients[id];
-        // console.log(connection);
+        removeLogoutUser( ws.user, id);
     });
 
 });
