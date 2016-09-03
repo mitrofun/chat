@@ -1,79 +1,52 @@
-import template from '../hbs/message.hbs';
+import messageTemplate from '../hbs/message.hbs';
+import loginTemplate from '../hbs/login.hbs';
 
-let msg = {
-    type: "",
-    user : {
-        name: "",
-        login: ""
-    },
-    text: "",
-    id:   "",
-    date: "",
-    error: ""
-};
+let currentSession,
+    currentUser;
 
-let user = {
-    name: "",
-    login: ""
-};
+function User(name, login) {
+    this.name = name;
+    this.login = login;
+}
+
+function Msg(type, session, user, text='') {
+    this.type = type;
+    this.session = session;
+    this.user = user;
+    this.text = text;
+    this.datetime = new Date();
+}
+
 
 let messagesList = document.querySelector('.messages');
 
-if (!window.WebSocket) {
-	document.body.innerHTML = 'WebSocket not support';
+let socket = new WebSocket("ws://localhost:8081");
+
+function loginApp() {
+    let loginWrapper = document.querySelector('.login');
+    let appWrapper = document.querySelector('.wrapper');
+
+    loginWrapper.remove();
+    appWrapper.classList.remove('is_hide');
 }
 
-let socket = new WebSocket("ws://localhost:8081");
+function setCurrentConnectionData(session, user) {
+    currentSession = session;
+    currentUser = user;
+}
 
 // send message
 document.forms.publish.onsubmit = function() {
 
-    msg = {
-        type: "message",
-        text: this.message.value,
-        date: new Date(),
-        user: user
-    };
+    let msg = new Msg("message", currentSession , currentUser, this.message.value);
+
+    //validation form HERE 
+    //
     
     socket.send(JSON.stringify(msg));
     return false;
 };
 
-
-document.forms.login.onsubmit = function (e) {
-
-    console.log('login');
-    e.preventDefault();
-
-    let loginForm = document.forms.login;
-
-    msg = {
-        type: "login",
-        user: {
-            name: loginForm.name.value,
-            login: loginForm.login.value
-        },
-        date: new Date()
-    };
-
-    console.log(msg);
-
-    socket.send(JSON.stringify(msg));
-
-    // if good
-
-    user = {
-        name: loginForm.name.value,
-        login: loginForm.login.value
-    };
-
-    let loginWrapper = document.querySelector('.login');
-    let appWrapper = document.querySelector('.wrapper');
-
-    loginWrapper.classList.add('is_hide');
-    appWrapper.classList.remove('is_hide');
-    //
-};
 
 socket.onmessage = function(event) {
 
@@ -82,8 +55,21 @@ socket.onmessage = function(event) {
     console.log('incomingMessage.type', incomingMessage.type);
 
     switch(incomingMessage.type) {
+
         case "message":
             showMessage(incomingMessage);
+            break;
+
+        case "enter-ok":
+            setCurrentConnectionData(incomingMessage.session, incomingMessage.user);
+            loginApp();
+            
+            // input all message
+            
+            break;
+
+        case "enter-error":
+            // show message
             break;
     }
 
@@ -91,15 +77,43 @@ socket.onmessage = function(event) {
 
 function showMessage(message) {
 
-    console.log(message);
-
-    document.querySelector('.messages').insertAdjacentHTML('beforeend', template({
+    document.querySelector('.messages').insertAdjacentHTML('beforeend', messageTemplate({
         username: message.user.login,
-        datetime: message.date,
+        datetime: message.datetime,
         message: message.text
     }));
     
     document.forms.publish.message.value = '';
-
     messagesList.scrollTop = messagesList.scrollHeight - messagesList.clientHeight
 }
+
+
+new Promise(function(resolve, reject) {
+    if (!window.WebSocket) {
+        reject(new Error("WebSocket not support"))
+    } else {
+        window.onload = resolve;
+    }
+}).then(function() {
+
+    document.body.insertAdjacentHTML('afterbegin', loginTemplate());
+
+    //login
+
+    let loginForm = document.forms.login;
+
+    loginForm.onsubmit = function (e) {
+        console.log('login');
+        e.preventDefault();
+
+        let user = new User(loginForm.name.value,loginForm.login.value);
+        let msg = new Msg("login", currentSession, user);
+
+        // send query for authorization
+        socket.send(JSON.stringify(msg));
+    };
+
+}).catch(function(e) {
+    console.error(e);
+    alert('Ошибка: ' + e.message);
+});
