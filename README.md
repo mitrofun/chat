@@ -32,6 +32,8 @@ git clone https://github.com/mitrofun/chat
 cd chat && bin/run.sh
 ```
 
+when open in browser http://127.0.0.1:8080
+
 ## Authors
 
 * **Dmitriy Shesterkin** - *Initial work* - [mitrofun](https://github.com/mitrofun)
