@@ -1,3 +1,10 @@
+@import "variables";
+
 .is_hide {
   display: none;
+}
+
+.background__opacity {
+  opacity: 0.2;
+  background: $light-grey;
 }

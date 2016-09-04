@@ -166,6 +166,34 @@ webSocketServer.on('connection', function(ws) {
                 addMessage(message);
 
                 break;
+
+            case "upload":
+
+                let mediaDir = './media/photos';
+                let base64Data = msg.file.replace(/^data:image\/(png|jpg|jpeg|gif);base64,/,"");
+
+                if (!fs.existsSync(mediaDir)){
+                    fs.mkdirSync(mediaDir);
+                }
+                
+                fs.writeFile(`${mediaDir}/${msg.user.login}.jpg`, base64Data, 'base64', function(err) {
+
+                    if (err) {
+                        let sendMsg = new Msg('notify', id, msg.user, err);
+                        sendMsg.status = 'danger';
+                        sendMessage(clients[id], sendMsg);
+                        return console.log(err)
+                    } else {
+                        let sendMsg = new Msg('change-photo', id, msg.user, 'File load success');
+                        sendMsg.status = 'success';
+                        
+                        for (let key in loginClients) {
+                        sendMessage(loginClients[key], sendMsg);
+                        }
+                    }
+                });
+
+                break;
         }
 
     });
@@ -201,4 +229,3 @@ http.createServer(function (req, res) {
 console.log("ws server start on localhost port: 8081");
 console.log("media server start on http://127.0.0.1:8000");
 console.log("http server for app client start on http://127.0.0.1:8080");
-

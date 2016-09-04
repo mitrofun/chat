@@ -1,0 +1,45 @@
+@import "variables";
+@import "compass";
+
+.panel__photo {
+  background: $white;
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: 85px;
+  transform: translateX(-50%);
+  border: 1px solid $gray;
+  padding: 15px;
+  @include border-radius(8px);
+}
+
+.photo__img {
+  border: 1px dashed $gray;
+  width: 212px;
+  height: 212px;
+  text-align: center;
+  padding-top: 94px;
+  @include border-radius(8px);
+  color: $gray;
+  background-size: cover;
+}
+
+.button {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  padding: 6px;
+  margin-top: 8px;
+  border: 1px solid transparent;
+  @include border-radius(8px);
+  color: $white;
+  background: $orange;
+  font-size: 15px;
+  font-family: "FiraSansRegular", Arial, sans-serif;
+
+  &:hover {
+    background:$white;
+    color: $orange;
+    border: 1px solid $orange;
+  }
+}
