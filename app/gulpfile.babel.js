@@ -14,6 +14,10 @@ gulp.task('build', () => {
 	runSequence("jade", "sass", "webpack", "misc", "watch", "img");
 });
 
+gulp.task('dev', () => {
+	runSequence("jade", "sass", "webpack", "misc", "img");
+});
+
 // Watcher
 gulp.task('watch', () => {
     gulp.watch(`${dirs.src}/sass/**/*.scss`, ["sass"]);

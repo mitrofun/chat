@@ -172,29 +172,31 @@ webSocketServer.on('connection', function(ws) {
 
             case "upload":
 
-                let mediaDir = './media/photos';
-                let base64Data = msg.file.replace(/^data:image\/(png|jpg|jpeg|gif);base64,/,"");
+                if (msg.file) {
+                    let mediaDir = './media/photos';
+                    let base64Data = msg.file.replace(/^data:image\/(png|jpg|jpeg|gif);base64,/,"");
 
-                if (!fs.existsSync(mediaDir)){
-                    fs.mkdirSync(mediaDir);
-                }
-                
-                fs.writeFile(`${mediaDir}/${msg.user.login}.jpg`, base64Data, 'base64', function(err) {
-
-                    if (err) {
-                        let sendMsg = new Msg('notify', id, msg.user, err);
-                        sendMsg.status = 'danger';
-                        sendMessage(clients[id], sendMsg);
-                        return console.log(err)
-                    } else {
-                        let sendMsg = new Msg('change-photo', id, msg.user, 'File load success');
-                        sendMsg.status = 'success';
-                        
-                        for (let key in loginClients) {
-                        sendMessage(loginClients[key], sendMsg);
-                        }
+                    if (!fs.existsSync(mediaDir)){
+                        fs.mkdirSync(mediaDir);
                     }
-                });
+
+                    fs.writeFile(`${mediaDir}/${msg.user.login}.jpg`, base64Data, 'base64', function(err) {
+
+                        if (err) {
+                            let sendMsg = new Msg('notify', id, msg.user, err);
+                            sendMsg.status = 'danger';
+                            sendMessage(clients[id], sendMsg);
+                            return console.log(err)
+                        } else {
+                            let sendMsg = new Msg('change-photo', id, msg.user, 'File load success');
+                            sendMsg.status = 'success';
+
+                            for (let key in loginClients) {
+                            sendMessage(loginClients[key], sendMsg);
+                            }
+                        }
+                    });
+                }
 
                 break;
         }

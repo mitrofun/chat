@@ -1,18 +1,16 @@
-import messageTemplate from '../hbs/main/message.hbs';
-import loginTemplate from '../hbs/modal/login.hbs';
-import sidebarUserTemplate from '../hbs/sidebar/user.hbs';
-import sidebarOnlineUsersTemplate from '../hbs/sidebar/online.hbs';
-import noticeTemplate from '../hbs/modal/notice.hbs';
-import uploadTemplate from '../hbs/modal/upload.hbs';
+import View from './modules/view';
+import Setting from './modules/app/setting'
+import User from './modules/model/user'
+
 
 let currentSession,
     currentUser,
     binaryData;
 
-function User(name, login) {
-    this.name = name;
-    this.login = login;
-}
+// function User(name, login) {
+//     this.name = name;
+//     this.login = login;
+// }
 
 function Msg(type, session, user, text='') {
     this.type = type;
@@ -21,8 +19,6 @@ function Msg(type, session, user, text='') {
     this.text = text;
     this.datetime = new Date();
 }
-
-let messagesList = document.querySelector('.messages');
 
 let socket = new WebSocket("ws://localhost:8081");
 
@@ -63,36 +59,36 @@ socket.onmessage = function(event) {
     switch(incomingMessage.type) {
 
         case "message":
-            showMessage(incomingMessage);
+            View.showMessage(incomingMessage);
             break;
 
         case "enter-ok":
             setCurrentConnectionData(incomingMessage.session, incomingMessage.user);
             loginApp();
-            showNotice(incomingMessage.status, incomingMessage.text);
-            showCurrentUser(incomingMessage.user);
+            View.showNotice(incomingMessage.status, incomingMessage.text);
+            View.showCurrentUser(incomingMessage.user);
             break;
 
         case "enter-error":
-            showNotice(incomingMessage.status, incomingMessage.text);
+            View.showNotice(incomingMessage.status, incomingMessage.text);
             let loginForm = document.forms.login;
             loginForm.login.classList.add('validate__error');
             break;
 
         case "change-users":
-            showUserOnline(incomingMessage.users);
+            View.showUserOnline(incomingMessage.users);
             break;
 
         case "notify":
-            showNotice(incomingMessage.status, incomingMessage.text);
+            View.showNotice(incomingMessage.status, incomingMessage.text);
             break;
 
         case "change-photo":
 
             if (currentUser.login == incomingMessage.user.login) {
-                 showNotice(incomingMessage.status, incomingMessage.text);
+                 View.showNotice(incomingMessage.status, incomingMessage.text);
             }
-            removeUploadPhotoForm();
+            View.removeUploadPhotoForm();
             updatePhoto(incomingMessage.user);
             break;
     }
@@ -107,7 +103,6 @@ function updatePhoto(user) {
         let photo = photos[i];
 
         if (photo.getAttribute('login') === user.login) {
-            // console.log(photo);
             url = `http://localhost:8000/photos/${user.login}.jpg?${getRandomString()}`;
             photo.src = url;
        }
@@ -117,53 +112,6 @@ function updatePhoto(user) {
         currentUser.photo = url;
     }
 
-}
-
-function showMessage(message) {
-
-    // console.log(message);
-
-    document.querySelector('.messages').insertAdjacentHTML('beforeend', messageTemplate({
-        username: message.user.name,
-        login: message.user.login,
-        photo: message.user.photo,
-        datetime: message.datetime,
-        message: message.text
-    }));
-    
-    document.forms.publish.message.value = '';
-    messagesList.scrollTop = messagesList.scrollHeight - messagesList.clientHeight
-}
-
-function showCurrentUser(user) {
-
-    let sidebar = document.querySelector('.sidebar');
-    sidebar.insertAdjacentHTML('afterbegin', sidebarUserTemplate({
-        name: user.name,
-        login: user.login,
-        photo: user.photo
-    }));
-}
-
-function showUserOnline(users) {
-    let usersOnline = document.querySelector('.users');
-
-    usersOnline.innerHTML = sidebarOnlineUsersTemplate({
-        users: users,
-        count: users.length
-    });
-}
-
-function showNotice(status, text) {
-
-    document.body.insertAdjacentHTML('afterbegin', noticeTemplate({
-        status: status,
-        text: text
-    }));
-
-    setTimeout(()=>{
-        document.querySelector('.notice').remove()
-    }, 2000);
 }
 
 function handleDragOver(e) {
@@ -187,18 +135,16 @@ function handleFileSelect(e) {
 
     let files = e.dataTransfer.files;
 
-    // console.log(files);
-
     if (files[0]) {
         let f = files[0];
 
         if (f.type != 'image/jpeg') {
-            showNotice('danger','Not supported format file.Select jpeg!');
+            View.showNotice('danger','Not supported format file.Select jpeg!');
             return false;
         }
 
-        if (f.size > 512 * 1024) {
-            showNotice('danger','You have exceeded the file size should not exceed 512 Kb');
+        if (f.size > Setting.limit * 1024) {
+            View.showNotice('danger','You have exceeded the file size should not exceed 512 Kb');
             return false;
         }
 
@@ -214,14 +160,18 @@ function handleFileSelect(e) {
 }
 
 function showUploadPhotoForm() {
+
     let modalPhoto = document.getElementById('modalPhoto');
 
     if (!modalPhoto) {
-          document.body.insertAdjacentHTML('afterbegin', uploadTemplate());
+
+        View.showUploadForm();
+
         let wrapper = document.querySelector('.wrapper');
         wrapper.classList.add('background__opacity');
 
         let dropAria = document.getElementById('dropAria');
+
         dropAria.addEventListener('dragover', handleDragOver);
 		dropAria.addEventListener('drop', handleFileSelect);
 
@@ -237,24 +187,12 @@ function showUploadPhotoForm() {
     }
 }
 
-function removeUploadPhotoForm() {
-
-    let modalPhoto = document.getElementById('modalPhoto');
-
-    if (modalPhoto) {
-        let wrapper = document.querySelector('.wrapper');
-        wrapper.classList.remove('background__opacity');
-        modalPhoto.remove();
-    }
-
-}
-
 
 new Promise(function(resolve, reject) {
 
     if (!window.WebSocket) {
         let error = 'WebSocket not support';
-        showNotice('danger', error);
+        View.showNotice('danger', error);
         reject(new Error(error))
     } else {
         window.onload = resolve;
@@ -262,7 +200,7 @@ new Promise(function(resolve, reject) {
 
 }).then(function() {
 
-    document.body.insertAdjacentHTML('afterbegin', loginTemplate());
+    View.showLoginForm();
 
     let loginForm = document.forms.login;
 
@@ -273,13 +211,13 @@ new Promise(function(resolve, reject) {
         let fieldUserName = loginForm.name;
         let fieldLogin = loginForm.login;
 
-        let user = new User(fieldUserName.value, fieldLogin.value);
+        let user = new User.create(fieldUserName.value, fieldLogin.value);
         let msg = new Msg("login", currentSession, user);
 
         if (fieldUserName.value.length !== 0 && fieldLogin.value.length !== 0) {
             socket.send(JSON.stringify(msg));
         } else {
-            showNotice('danger', 'Enter the user name and login');
+            View.showNotice('danger', 'Enter the user name and login');
             fieldUserName.classList.add('validate__error');
             fieldLogin.classList.add('validate__error');
         }
@@ -294,7 +232,7 @@ new Promise(function(resolve, reject) {
         }
         if (e.target.id == 'closeUploadForm') {
             e.preventDefault();
-            removeUploadPhotoForm();
+            View.removeUploadPhotoForm();
         }
 
     }

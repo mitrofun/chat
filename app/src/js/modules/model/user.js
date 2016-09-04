@@ -1,7 +1,8 @@
 'use strict';
 
 export default {
-    users: [],
-    messages: []
-    
+    create(name, login) {
+        this.name = name;
+        this.login = login;
+    }
 }
