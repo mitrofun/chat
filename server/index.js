@@ -3,6 +3,8 @@
 let http = require('http');
 let Static = require('node-static');
 let WebSocketServer = new require('ws');
+let fs = require('fs');
+const path = require('path');
 
 let users = {};
 let messages = [];
@@ -19,6 +21,20 @@ function Msg(type, session, user, text ) {
     this.user = user;
     this.text = text;
     this.datetime = new Date();
+}
+
+function User(name, login, photo='http://localhost:8000/no-photo.jpg') {
+    this.name = name;
+    this.login = login;
+    this.photo = photo;
+
+    function getPhoto() {
+        return false;
+    }
+
+    function setPhoto() {
+
+    }
 }
 
 function addLoggedUser(user, socket, id) {
@@ -39,7 +55,6 @@ function sendMessage(socket, message) {
     } else {
         socket.send(JSON.stringify(message));
     }
-
 }
 
 
@@ -48,9 +63,15 @@ function loginUser(user, sessionId, socket) {
     let result = false;
 
     if (!(user.login in users)) {
-        addLoggedUser(user, socket, sessionId);
-        msg = new Msg('enter-ok', sessionId, user, `Hi, ${user.name}!`);
-        result = true
+        result = new User(user.name, user.login);
+
+        if (result.getPhoto()) {
+            result.setPhoto()
+        }
+
+        addLoggedUser(result, socket, sessionId);
+        msg = new Msg('enter-ok', sessionId, result, `Hi, ${user.name}!`);
+
     } else {
         msg = new Msg('enter-error', sessionId, false, `current user is already in chat!`);
     }
@@ -90,7 +111,7 @@ webSocketServer.on('connection', function(ws) {
 
                 if (loginUser(msg.user, id, clients[id])) {
                      // get photo
-
+                    
                     sendArchiveMessages(clients[id]);
                 }
                 break;
@@ -114,6 +135,7 @@ webSocketServer.on('connection', function(ws) {
 
 });
 
+// severs
 
 let appServer = new Static.Server('../app/dist');
 let mediaServer = new Static.Server('./media');
@@ -133,3 +155,25 @@ http.createServer(function (req, res) {
 console.log("ws server start on localhost port: 8081");
 console.log("media server start on http://127.0.0.1:8000");
 console.log("http server for app client start on http://127.0.0.1:8080");
+
+////PHOTOS
+
+let currentDir = path.dirname(fs.realpathSync(__filename));
+let photoDir = `${currentDir}/media/photos`;
+
+console.log(photoDir);
+
+function fsExistsSync(file) {
+    try {
+        fs.accessSync(file);
+        return true
+    } catch (e) {
+        return false
+    }
+}
+
+if (fsExistsSync(`${photoDir}/mitri4.jpeg`)) {
+    console.log('COOOL')
+} else {
+    console.log('NotCOOOL')
+}

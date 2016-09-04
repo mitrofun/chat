@@ -4,9 +4,18 @@ import loginTemplate from '../hbs/login.hbs';
 let currentSession,
     currentUser;
 
-function User(name, login) {
+function User(name, login, photo='http://localhost:8000/no-photo.jpg') {
     this.name = name;
     this.login = login;
+    this.photo = photo;
+    
+    function getPhoto() {
+        
+    }
+    
+    function setPhoto() {
+        
+    }
 }
 
 function Msg(type, session, user, text='') {
@@ -40,7 +49,7 @@ document.forms.publish.onsubmit = function() {
 
     let msg = new Msg("message", currentSession , currentUser, this.message.value);
 
-    //validation form HERE 
+    //TODO: validation form
     //
     
     socket.send(JSON.stringify(msg));
@@ -63,9 +72,6 @@ socket.onmessage = function(event) {
         case "enter-ok":
             setCurrentConnectionData(incomingMessage.session, incomingMessage.user);
             loginApp();
-            
-            // input all message
-            
             break;
 
         case "enter-error":
@@ -77,8 +83,11 @@ socket.onmessage = function(event) {
 
 function showMessage(message) {
 
+    console.log(message);
+
     document.querySelector('.messages').insertAdjacentHTML('beforeend', messageTemplate({
         username: message.user.login,
+        photo: message.user.photo,
         datetime: message.datetime,
         message: message.text
     }));
