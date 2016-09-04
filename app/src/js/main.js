@@ -1,20 +1,23 @@
 import messageTemplate from '../hbs/message.hbs';
 import loginTemplate from '../hbs/login.hbs';
+import sidebarUserTemplate from '../hbs/sidebar/user.hbs';
+import sidebarOnlineUsersTemplate from '../hbs/sidebar/online.hbs';
+import noticeTemplate from '../hbs/notice.hbs';
 
 let currentSession,
     currentUser;
 
-function User(name, login, photo='http://localhost:8000/no-photo.jpg') {
+function User(name, login) {
     this.name = name;
     this.login = login;
-    this.photo = photo;
-    
+    this.photo = getPhoto();
+
     function getPhoto() {
-        
+
     }
-    
+
     function setPhoto() {
-        
+
     }
 }
 
@@ -37,6 +40,8 @@ function loginApp() {
 
     loginWrapper.remove();
     appWrapper.classList.remove('is_hide');
+
+
 }
 
 function setCurrentConnectionData(session, user) {
@@ -49,9 +54,6 @@ document.forms.publish.onsubmit = function() {
 
     let msg = new Msg("message", currentSession , currentUser, this.message.value);
 
-    //TODO: validation form
-    //
-    
     socket.send(JSON.stringify(msg));
     return false;
 };
@@ -61,7 +63,7 @@ socket.onmessage = function(event) {
 
     let incomingMessage = JSON.parse(event.data);
 
-    console.log('incomingMessage.type', incomingMessage.type);
+    // console.log('incomingMessage.type', incomingMessage.type);
 
     switch(incomingMessage.type) {
 
@@ -72,10 +74,22 @@ socket.onmessage = function(event) {
         case "enter-ok":
             setCurrentConnectionData(incomingMessage.session, incomingMessage.user);
             loginApp();
+            showNotice(incomingMessage.status, incomingMessage.text);
+            showCurrentUser(incomingMessage.user);
             break;
 
         case "enter-error":
-            // show message
+            showNotice(incomingMessage.status, incomingMessage.text);
+            let loginForm = document.forms.login;
+            loginForm.login.classList.add('validate__error');
+            break;
+
+        case "change-users":
+            showUserOnline(incomingMessage.users);
+            break;
+
+        case "notify":
+            showNotice(incomingMessage.status, incomingMessage.text);
             break;
     }
 
@@ -96,6 +110,36 @@ function showMessage(message) {
     messagesList.scrollTop = messagesList.scrollHeight - messagesList.clientHeight
 }
 
+function showCurrentUser(user) {
+
+    let sidebar = document.querySelector('.sidebar');
+    sidebar.insertAdjacentHTML('afterbegin', sidebarUserTemplate({
+        name: user.name,
+        photo: user.photo
+    }));
+}
+
+function showUserOnline(users) {
+    let usersOnline = document.querySelector('.users');
+
+    usersOnline.innerHTML = sidebarOnlineUsersTemplate({
+        users: users,
+        count: users.length
+    });
+}
+
+function showNotice(status, text) {
+
+    document.body.insertAdjacentHTML('afterbegin', noticeTemplate({
+        status: status,
+        text: text
+    }));
+
+    setTimeout(()=>{
+        document.querySelector('.notice').remove()
+    }, 2000);
+}
+
 
 new Promise(function(resolve, reject) {
     if (!window.WebSocket) {
@@ -107,19 +151,25 @@ new Promise(function(resolve, reject) {
 
     document.body.insertAdjacentHTML('afterbegin', loginTemplate());
 
-    //login
-
     let loginForm = document.forms.login;
 
     loginForm.onsubmit = function (e) {
         console.log('login');
         e.preventDefault();
 
-        let user = new User(loginForm.name.value,loginForm.login.value);
+        let fieldUserName = loginForm.name;
+        let fieldLogin = loginForm.login;
+
+        let user = new User(fieldUserName.value, fieldLogin.value);
         let msg = new Msg("login", currentSession, user);
 
-        // send query for authorization
-        socket.send(JSON.stringify(msg));
+        if (fieldUserName.value.length !== 0 && fieldLogin.value.length !== 0) {
+            socket.send(JSON.stringify(msg));
+        } else {
+            showNotice('danger', 'Enter the user name and login');
+            fieldUserName.classList.add('validate__error');
+            fieldLogin.classList.add('validate__error');
+        }
     };
 
 }).catch(function(e) {

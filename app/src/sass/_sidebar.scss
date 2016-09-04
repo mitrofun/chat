@@ -1,0 +1,40 @@
+@import "variables";
+
+.user {
+ margin: 10px;
+}
+
+.user__photo {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.photo__link_middle {
+  vertical-align: middle;
+}
+
+.user__name {
+  margin-left: 10px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.users {
+  margin-top: 25px;
+}
+
+.users__online {
+  margin-left: 10px;
+}
+
+.users__header {
+  margin: 10px;
+}
+
+.users__list {
+  margin: 10px;
+}
+
+.users__item {
+  margin: 5px 10px;
+}

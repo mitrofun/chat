@@ -8,13 +8,13 @@ body {
 .sidebar {
   background: $orange;
   height: 100vh;
+  color: $white;
 }
 
 .messages {
   overflow: auto;
   height: calc(100vh - 65px);
 }
-
 
 .message {
   padding: 5px;
@@ -115,5 +115,8 @@ body {
     display: block;
     width: 100%;
   }
+}
 
+.validate__error {
+  border: 1px solid $danger;
 }

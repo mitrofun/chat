@@ -1,0 +1,25 @@
+@import "compass";
+@import "variables";
+
+.notice {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 25px;
+  padding: 5px 55px;
+  @include border-radius(8px);
+  color: white;
+}
+
+.notice_success {
+  background: $success;
+}
+
+.notice_danger {
+  background: $danger;
+}
+
+.notice_warning {
+  background: $orange;
+}

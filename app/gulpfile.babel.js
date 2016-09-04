@@ -19,6 +19,7 @@ gulp.task('watch', () => {
     gulp.watch(`${dirs.src}/sass/**/*.scss`, ["sass"]);
     gulp.watch(`${dirs.src}/**/*.jade`, ["jade"]);
     gulp.watch(`${dirs.src}/js/**/*.js`, ["webpack"]);
+    gulp.watch(`${dirs.src}/hbs/**/*.hbs`, ["hbs", "webpack"]);
 });
 
 gulp.task('clean', function() {

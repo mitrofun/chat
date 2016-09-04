@@ -79,9 +79,10 @@ function loginUser(user, sessionId, socket) {
         result = new User(user.name, user.login);
         addLoggedUser(result, socket, sessionId);
         msg = new Msg('enter-ok', sessionId, result, `Hi, ${user.name}!`);
-
+        msg.status = 'success';
     } else {
-        msg = new Msg('enter-error', sessionId, false, `current user is already in chat!`);
+        msg = new Msg('enter-error', sessionId, false, `Current user is already in chat!`);
+        msg.status = 'danger';
     }
     sendMessage(socket, msg);
     return result;
@@ -97,6 +98,37 @@ function sendArchiveMessages(socket) {
         sendMessage(socket, message)
     })
 
+}
+
+function sendUsersStatus(socket) {
+    let usersArray = [];
+    let msg = new Msg('change-users', 0, {}, '');
+
+    for (let user in users) {
+        usersArray.push(users[user].name)
+    }
+
+    msg.users = usersArray;
+    
+    sendMessage(socket, msg)
+}
+
+function sendAllUsersConnectStatus(users) {
+    for (let key in users) {
+        sendUsersStatus(users[key])
+    }
+}
+
+function notifyAllUsers(user, status, text, id) {
+    
+    let notice = new Msg('notify', 0, {}, `${user} ${text}!`);
+        notice.status = status;
+
+        for (let key in loginClients) {
+            if (id != key) {
+                sendMessage(loginClients[key], notice);
+            }
+        }
 }
 
 webSocketServer.on('connection', function(ws) {
@@ -118,19 +150,21 @@ webSocketServer.on('connection', function(ws) {
             case "login":
 
                 if (loginUser(msg.user, id, clients[id])) {
-                     // get photo
-                    
+                    notifyAllUsers(msg.user.login,'warning', 'joined the chat', id);
                     sendArchiveMessages(clients[id]);
+                    sendAllUsersConnectStatus(loginClients)
                 }
+
                 break;
 
             // send message
             case "message":
 
                 for (let key in loginClients) {
-                    loginClients[key].send(message);
+                    sendMessage(loginClients[key], message);
                 }
                 addMessage(message);
+
                 break;
         }
 
@@ -138,7 +172,11 @@ webSocketServer.on('connection', function(ws) {
 
     ws.on('close', function() {
         console.log('connection close ' + id);
-        removeLogoutUser( ws.user, id);
+
+        let leftUser = ws.user;
+        removeLogoutUser(leftUser, id);
+        notifyAllUsers(leftUser, 'warning', 'left the chat');
+        sendAllUsersConnectStatus(loginClients);
     });
 
 });
