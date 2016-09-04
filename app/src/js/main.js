@@ -1,16 +1,14 @@
 import View from './modules/view';
 import Setting from './modules/app/setting'
-import User from './modules/model/user'
-
 
 let currentSession,
     currentUser,
     binaryData;
 
-// function User(name, login) {
-//     this.name = name;
-//     this.login = login;
-// }
+function User(name, login) {
+    this.name = name;
+    this.login = login;
+}
 
 function Msg(type, session, user, text='') {
     this.type = type;
@@ -20,20 +18,12 @@ function Msg(type, session, user, text='') {
     this.datetime = new Date();
 }
 
-let socket = new WebSocket("ws://localhost:8081");
+let socket = new WebSocket(`ws://${Setting.host}:${Setting.portWebSocket}`);
 
 function getRandomString() {
     return Math.random().toString(36).slice(2);
 }
 
-
-function loginApp() {
-    let loginWrapper = document.querySelector('.login');
-    let appWrapper = document.querySelector('.wrapper');
-
-    loginWrapper.remove();
-    appWrapper.classList.remove('is_hide');
-}
 
 function setCurrentConnectionData(session, user) {
     currentSession = session;
@@ -64,7 +54,7 @@ socket.onmessage = function(event) {
 
         case "enter-ok":
             setCurrentConnectionData(incomingMessage.session, incomingMessage.user);
-            loginApp();
+            View.loggedApp();
             View.showNotice(incomingMessage.status, incomingMessage.text);
             View.showCurrentUser(incomingMessage.user);
             break;
@@ -103,7 +93,8 @@ function updatePhoto(user) {
         let photo = photos[i];
 
         if (photo.getAttribute('login') === user.login) {
-            url = `http://localhost:8000/photos/${user.login}.jpg?${getRandomString()}`;
+            // console.log(photo);
+            url = `http://${Setting.host}:${Setting.portMedia}/photos/${user.login}.jpg?${getRandomString()}`;
             photo.src = url;
        }
     }
@@ -211,7 +202,7 @@ new Promise(function(resolve, reject) {
         let fieldUserName = loginForm.name;
         let fieldLogin = loginForm.login;
 
-        let user = new User.create(fieldUserName.value, fieldLogin.value);
+        let user = new User(fieldUserName.value, fieldLogin.value);
         let msg = new Msg("login", currentSession, user);
 
         if (fieldUserName.value.length !== 0 && fieldLogin.value.length !== 0) {

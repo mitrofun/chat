@@ -83,6 +83,15 @@ export default {
             modalPhoto.remove();
         }
 
+    },
+    
+    loggedApp() {
+        
+        let loginWrapper = document.querySelector('.login');
+        let appWrapper = document.querySelector('.wrapper');
+    
+        loginWrapper.remove();
+        appWrapper.classList.remove('is_hide');
     }
     
 }
