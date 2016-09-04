@@ -5,6 +5,15 @@ let currentSession,
     currentUser,
     binaryData;
 
+let socket = new WebSocket(`ws://${Setting.host}:${Setting.portWebSocket}`);
+
+// initApp() TODO: initGlobalParam
+
+function setCurrentConnectionData(session, user) { //TODO: Rename
+    currentSession = session;
+    currentUser = user;
+}
+
 function User(name, login) {
     this.name = name;
     this.login = login;
@@ -18,16 +27,8 @@ function Msg(type, session, user, text='') {
     this.datetime = new Date();
 }
 
-let socket = new WebSocket(`ws://${Setting.host}:${Setting.portWebSocket}`);
-
 function getRandomString() {
     return Math.random().toString(36).slice(2);
-}
-
-
-function setCurrentConnectionData(session, user) {
-    currentSession = session;
-    currentUser = user;
 }
 
 // send message
@@ -39,12 +40,9 @@ document.forms.publish.onsubmit = function(e) {
 
 };
 
-
 socket.onmessage = function(event) {
 
     let incomingMessage = JSON.parse(event.data);
-
-    // console.log('incomingMessage.type', incomingMessage.type);
 
     switch(incomingMessage.type) {
 
@@ -86,14 +84,15 @@ socket.onmessage = function(event) {
 };
 
 function updatePhoto(user) {
-    let photos = document.querySelectorAll('.photo__link');
+
     let url;
+    let photos = document.querySelectorAll('.photo__link');
 
     for (let i = photos.length - 1; i>= 0 ; i --) {
         let photo = photos[i];
 
         if (photo.getAttribute('login') === user.login) {
-            // console.log(photo);
+
             url = `http://${Setting.host}:${Setting.portMedia}/photos/${user.login}.jpg?${getRandomString()}`;
             photo.src = url;
        }
@@ -109,13 +108,6 @@ function handleDragOver(e) {
     e.stopPropagation();
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
-}
-
-function setPhotoBackground(binData) {
-    let dropAria = document.getElementById('dropAria');
-    dropAria.style.backgroundImage = `url(${binData})`;
-    dropAria.innerText = '';
-    binaryData = binData;
 }
 
 function handleFileSelect(e) {
@@ -143,7 +135,8 @@ function handleFileSelect(e) {
 
         reader.onload = function(e) {
 
-           setPhotoBackground(e.target.result);
+           View.setPhotoBackground(e.target.result);
+           binaryData = e.target.result; //global
 
         };
         reader.readAsDataURL(f);
@@ -172,8 +165,9 @@ function showUploadPhotoForm() {
             e.preventDefault();
             console.log('upload');
             let msg = new Msg("upload", currentSession , currentUser);
-            msg.file = binaryData;
+            msg.file = binaryData;  //global
             socket.send(JSON.stringify(msg));
+            binaryData = '';
         }
     }
 }

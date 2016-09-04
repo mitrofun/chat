@@ -1,4 +1,5 @@
 'use strict';
+import Setting from './app/setting'
 
 //noinspection JSUnresolvedVariable
 import noticeTemplate from '../../hbs/modal/notice.hbs';
@@ -25,7 +26,7 @@ export default {
     
         setTimeout(()=>{
             document.querySelector('.notice').remove()
-        }, 2000);
+        }, Setting.DisplayTimeNotification);
         
     },
     
@@ -92,6 +93,12 @@ export default {
     
         loginWrapper.remove();
         appWrapper.classList.remove('is_hide');
+    },
+    
+    setPhotoBackground(binData) {
+        let dropAria = document.getElementById('dropAria');
+        dropAria.style.backgroundImage = `url(${binData})`;
+        dropAria.innerText = '';
     }
     
 }
