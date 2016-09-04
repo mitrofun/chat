@@ -23,17 +23,30 @@ function Msg(type, session, user, text ) {
     this.datetime = new Date();
 }
 
-function User(name, login, photo='http://localhost:8000/no-photo.jpg') {
+function User(name, login) {
     this.name = name;
     this.login = login;
-    this.photo = photo;
+    this.photo = getPhoto(this.login);
 
-    function getPhoto() {
-        return false;
-    }
+    function getPhoto(name) {
 
-    function setPhoto() {
+        let currentDir = path.dirname(fs.realpathSync(__filename));
+        let photoDir = `${currentDir}/media/photos`;
 
+        function fsExistsSync(file) {
+            try {
+                fs.accessSync(file);
+                return true
+            } catch (e) {
+                return false
+            }
+        }
+
+        if (fsExistsSync(`${photoDir}/${name}.jpg`)) {
+            return `http://localhost:8000/photos/${name}.jpg`
+        } else {
+            return 'http://localhost:8000/no-photo.jpg'
+        }
     }
 }
 
@@ -64,11 +77,6 @@ function loginUser(user, sessionId, socket) {
 
     if (!(user.login in users)) {
         result = new User(user.name, user.login);
-
-        if (result.getPhoto()) {
-            result.setPhoto()
-        }
-
         addLoggedUser(result, socket, sessionId);
         msg = new Msg('enter-ok', sessionId, result, `Hi, ${user.name}!`);
 
@@ -156,24 +164,3 @@ console.log("ws server start on localhost port: 8081");
 console.log("media server start on http://127.0.0.1:8000");
 console.log("http server for app client start on http://127.0.0.1:8080");
 
-////PHOTOS
-
-let currentDir = path.dirname(fs.realpathSync(__filename));
-let photoDir = `${currentDir}/media/photos`;
-
-console.log(photoDir);
-
-function fsExistsSync(file) {
-    try {
-        fs.accessSync(file);
-        return true
-    } catch (e) {
-        return false
-    }
-}
-
-if (fsExistsSync(`${photoDir}/mitri4.jpeg`)) {
-    console.log('COOOL')
-} else {
-    console.log('NotCOOOL')
-}
