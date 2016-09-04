@@ -7,8 +7,7 @@ import uploadTemplate from '../hbs/modal/upload.hbs';
 
 let currentSession,
     currentUser,
-    binaryData,
-    counterLoadPhoto = 0;
+    binaryData;
 
 function User(name, login) {
     this.name = name;
@@ -27,6 +26,11 @@ let messagesList = document.querySelector('.messages');
 
 let socket = new WebSocket("ws://localhost:8081");
 
+function getRandomString() {
+    return Math.random().toString(36).slice(2);
+}
+
+
 function loginApp() {
     let loginWrapper = document.querySelector('.login');
     let appWrapper = document.querySelector('.wrapper');
@@ -41,12 +45,12 @@ function setCurrentConnectionData(session, user) {
 }
 
 // send message
-document.forms.publish.onsubmit = function() {
+document.forms.publish.onsubmit = function(e) {
+    e.preventDefault();
 
     let msg = new Msg("message", currentSession , currentUser, this.message.value);
-
     socket.send(JSON.stringify(msg));
-    return false;
+
 };
 
 
@@ -89,22 +93,28 @@ socket.onmessage = function(event) {
                  showNotice(incomingMessage.status, incomingMessage.text);
             }
             removeUploadPhotoForm();
-            updatePhoto(incomingMessage.user,counterLoadPhoto ++);
+            updatePhoto(incomingMessage.user);
             break;
     }
 
 };
 
-function updatePhoto(user, counter) {
+function updatePhoto(user) {
     let photos = document.querySelectorAll('.photo__link');
+    let url;
 
     for (let i = photos.length - 1; i>= 0 ; i --) {
         let photo = photos[i];
 
         if (photo.getAttribute('login') === user.login) {
-            console.log(photo);
-            photo.src = `http://localhost:8000/photos/${user.login}.jpg?${counter}`;
+            // console.log(photo);
+            url = `http://localhost:8000/photos/${user.login}.jpg?${getRandomString()}`;
+            photo.src = url;
        }
+    }
+
+    if (currentUser.login == user.login) {
+        currentUser.photo = url;
     }
 
 }
@@ -220,8 +230,6 @@ function showUploadPhotoForm() {
         uploadPhotoBth.onclick = (e) => {
             e.preventDefault();
             console.log('upload');
-            console.log(currentUser);
-            console.log(currentSession);
             let msg = new Msg("upload", currentSession , currentUser);
             msg.file = binaryData;
             socket.send(JSON.stringify(msg));

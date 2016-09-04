@@ -15,6 +15,10 @@ let webSocketServer = new WebSocketServer.Server({
   port: 8081
 });
 
+function getRandomString() {
+    return Math.random().toString(36).slice(2);
+}
+
 function Msg(type, session, user, text ) {
     this.type = type;
     this.session = session;
@@ -43,7 +47,7 @@ function User(name, login) {
         }
 
         if (fsExistsSync(`${photoDir}/${name}.jpg`)) {
-            return `http://localhost:8000/photos/${name}.jpg`
+            return `http://localhost:8000/photos/${name}.jpg?${getRandomString()}`
         } else {
             return 'http://localhost:8000/no-photo.jpg'
         }
@@ -69,7 +73,6 @@ function sendMessage(socket, message) {
         socket.send(JSON.stringify(message));
     }
 }
-
 
 function loginUser(user, sessionId, socket) {
     let msg;
