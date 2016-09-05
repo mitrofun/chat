@@ -1,8 +1,8 @@
 'use strict';
 
-// export default {
-//     create(name, login) {
-//         this.name = name;
-//         this.login = login;
-//     }
-// }
+let User = function (name, login) {
+    this.name = name;
+    this.login = login;
+};
+
+export {User}

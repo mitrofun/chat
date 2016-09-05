@@ -1,5 +1,4 @@
 'use strict';
-import Setting from './app/setting'
 
 //noinspection JSUnresolvedVariable
 import noticeTemplate from '../../hbs/modal/notice.hbs';
@@ -16,19 +15,28 @@ import uploadTemplate from '../../hbs/modal/upload.hbs';
 
 
 export default {
-    
+
     showNotice(status, text) {
 
         document.body.insertAdjacentHTML('afterbegin', noticeTemplate({
             status: status,
             text: text
         }));
-    
-        setTimeout(()=>{
-            document.querySelector('.notice').remove()
-        }, Setting.DisplayTimeNotification);
-        
+
     },
+    
+    // showNotice(status, text) {
+    //
+    //     document.body.insertAdjacentHTML('afterbegin', noticeTemplate({
+    //         status: status,
+    //         text: text
+    //     }));
+    //
+    //     setTimeout(()=>{
+    //         document.querySelector('.notice').remove()
+    //     }, Setting.DisplayTimeNotification);
+    //
+    // },
     
     showMessage(message) {
     

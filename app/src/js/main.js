@@ -1,5 +1,8 @@
 import View from './modules/view';
 import Setting from './modules/app/setting'
+import Route from './modules/router'
+import { User } from './modules/model/user'
+import { Msg } from './modules/model/message'
 
 let currentSession,
     currentUser,
@@ -7,24 +10,9 @@ let currentSession,
 
 let socket = new WebSocket(`ws://${Setting.host}:${Setting.portWebSocket}`);
 
-// initApp() TODO: initGlobalParam
-
-function setCurrentConnectionData(session, user) { //TODO: Rename
+function initAppData(session, user) {
     currentSession = session;
     currentUser = user;
-}
-
-function User(name, login) {
-    this.name = name;
-    this.login = login;
-}
-
-function Msg(type, session, user, text='') {
-    this.type = type;
-    this.session = session;
-    this.user = user;
-    this.text = text;
-    this.datetime = new Date();
 }
 
 function getRandomString() {
@@ -51,14 +39,16 @@ socket.onmessage = function(event) {
             break;
 
         case "enter-ok":
-            setCurrentConnectionData(incomingMessage.session, incomingMessage.user);
+            initAppData(incomingMessage.session, incomingMessage.user);
             View.loggedApp();
-            View.showNotice(incomingMessage.status, incomingMessage.text);
+            Route.handle('showNotice', incomingMessage.status, incomingMessage.text);
+            // View.showNotice(incomingMessage.status, incomingMessage.text);
             View.showCurrentUser(incomingMessage.user);
             break;
 
         case "enter-error":
-            View.showNotice(incomingMessage.status, incomingMessage.text);
+            Route.handle('showNotice', incomingMessage.status, incomingMessage.text);
+            // View.showNotice(incomingMessage.status, incomingMessage.text);
             let loginForm = document.forms.login;
             loginForm.login.classList.add('validate__error');
             break;
@@ -68,13 +58,15 @@ socket.onmessage = function(event) {
             break;
 
         case "notify":
-            View.showNotice(incomingMessage.status, incomingMessage.text);
+            Route.handle('showNotice', incomingMessage.status, incomingMessage.text);
+            // View.showNotice(incomingMessage.status, incomingMessage.text);
             break;
 
         case "change-photo":
 
             if (currentUser.login == incomingMessage.user.login) {
-                 View.showNotice(incomingMessage.status, incomingMessage.text);
+                 Route.handle('showNotice', incomingMessage.status, incomingMessage.text);
+                 // View.showNotice(incomingMessage.status, incomingMessage.text);
             }
             View.removeUploadPhotoForm();
             updatePhoto(incomingMessage.user);
@@ -84,7 +76,7 @@ socket.onmessage = function(event) {
 };
 
 function updatePhoto(user) {
-
+    
     let url;
     let photos = document.querySelectorAll('.photo__link');
 
@@ -122,12 +114,14 @@ function handleFileSelect(e) {
         let f = files[0];
 
         if (f.type != 'image/jpeg') {
-            View.showNotice('danger','Not supported format file.Select jpeg!');
+            Route.handle('showNotice', 'danger', 'Not supported format file.Select jpeg!');
+            // View.showNotice('danger','Not supported format file.Select jpeg!');
             return false;
         }
 
         if (f.size > Setting.limit * 1024) {
-            View.showNotice('danger','You have exceeded the file size should not exceed 512 Kb');
+            Route.handle('showNotice', 'danger', 'You have exceeded the file size should not exceed 512 Kb');
+            // View.showNotice('danger','You have exceeded the file size should not exceed 512 Kb');
             return false;
         }
 
@@ -177,7 +171,9 @@ new Promise(function(resolve, reject) {
 
     if (!window.WebSocket) {
         let error = 'WebSocket not support';
-        View.showNotice('danger', error);
+        // Route.handle('');
+        Route.handle('showNotice', 'danger', error);
+        // View.showNotice('danger', error);
         reject(new Error(error))
     } else {
         window.onload = resolve;
@@ -190,6 +186,7 @@ new Promise(function(resolve, reject) {
     let loginForm = document.forms.login;
 
     loginForm.onsubmit = function (e) {
+
         console.log('login');
         e.preventDefault();
 
@@ -202,7 +199,8 @@ new Promise(function(resolve, reject) {
         if (fieldUserName.value.length !== 0 && fieldLogin.value.length !== 0) {
             socket.send(JSON.stringify(msg));
         } else {
-            View.showNotice('danger', 'Enter the user name and login');
+            Route.handle('showNotice', 'danger', 'Enter the user name and login');
+            // View.showNotice('danger', 'Enter the user name and login');
             fieldUserName.classList.add('validate__error');
             fieldLogin.classList.add('validate__error');
         }
