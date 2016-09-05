@@ -1,5 +1,6 @@
 'use strict';
 
+import Setting from './app/setting';
 //noinspection JSUnresolvedVariable
 import noticeTemplate from '../../hbs/modal/notice.hbs';
 //noinspection JSUnresolvedVariable
@@ -23,25 +24,16 @@ export default {
             text: text
         }));
 
+        this.removeNotice(Setting.DisplayTimeNotification);
     },
     
-    // showNotice(status, text) {
-    //
-    //     document.body.insertAdjacentHTML('afterbegin', noticeTemplate({
-    //         status: status,
-    //         text: text
-    //     }));
-    //
-    //     setTimeout(()=>{
-    //         document.querySelector('.notice').remove()
-    //     }, Setting.DisplayTimeNotification);
-    //
-    // },
+    removeNotice(delay) {
+        
+        setTimeout(()=>{ document.querySelector('.notice').remove() }, delay);
+    },
     
     showMessage(message) {
-    
-        let messagesList = document.querySelector('.messages');
-    
+        
         document.querySelector('.messages').insertAdjacentHTML('beforeend', messageTemplate({
             username: message.user.name,
             login: message.user.login,
@@ -50,8 +42,11 @@ export default {
             message: message.text
         }));
         
-        document.forms.publish.message.value = '';
-        messagesList.scrollTop = messagesList.scrollHeight - messagesList.clientHeight
+    },
+    
+    showApp() {
+        document.querySelector('.login').remove();
+        document.querySelector('.wrapper').classList.remove('is_hide');
     },
     
     showCurrentUser(user) {
@@ -94,19 +89,9 @@ export default {
 
     },
     
-    loggedApp() {
-        
-        let loginWrapper = document.querySelector('.login');
-        let appWrapper = document.querySelector('.wrapper');
-    
-        loginWrapper.remove();
-        appWrapper.classList.remove('is_hide');
-    },
-    
     setPhotoBackground(binData) {
         let dropAria = document.getElementById('dropAria');
         dropAria.style.backgroundImage = `url(${binData})`;
         dropAria.innerText = '';
     }
-    
 }

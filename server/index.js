@@ -37,20 +37,12 @@ function User(name, login) {
         let currentDir = path.dirname(fs.realpathSync(__filename));
         let photoDir = `${currentDir}/media/photos`;
 
-        function fsExistsSync(file) {
-            try {
-                fs.accessSync(file);
-                return true
-            } catch (e) {
-                return false
-            }
-        }
-
-        if (fsExistsSync(`${photoDir}/${name}.jpg`)) {
+        try {
+            fs.accessSync(`${photoDir}/${name}.jpg`);
             return `http://localhost:8000/photos/${name}.jpg?${getRandomString()}`
-        } else {
-            return 'http://localhost:8000/no-photo.jpg'
-        }
+        } catch (e) {
+                return 'http://localhost:8000/no-photo.jpg'
+            }
     }
 }
 
@@ -153,7 +145,7 @@ webSocketServer.on('connection', function(ws) {
             case "login":
 
                 if (loginUser(msg.user, id, clients[id])) {
-                    notifyAllUsers(msg.user.login,'warning', 'joined the chat', id);
+                    notifyAllUsers(msg.user.login, 'warning', 'joined the chat', id);
                     sendArchiveMessages(clients[id]);
                     sendAllUsersConnectStatus(loginClients)
                 }
@@ -208,7 +200,9 @@ webSocketServer.on('connection', function(ws) {
 
         let leftUser = ws.user;
         removeLogoutUser(leftUser, id);
-        notifyAllUsers(leftUser, 'warning', 'left the chat');
+        if (leftUser) {
+            notifyAllUsers(leftUser, 'warning', 'left the chat');
+        }
         sendAllUsersConnectStatus(loginClients);
     });
 
