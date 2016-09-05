@@ -2,6 +2,9 @@ import gulp from 'gulp';
 import browserSync from 'browser-sync';
 import pkg from '../package.json';
 const dirs = pkg['app-configs'].directories;
+const path = require("path");
+
+console.log(`${__dirname}/helpers/**/*.js`);
 
 gulp.task('connect', function () {
     browserSync.init({
@@ -16,4 +19,6 @@ gulp.task('connect', function () {
     browserSync.watch(`${dirs.src}/jade/**/*.jade`).on('change', browserSync.reload);
     browserSync.watch(`${dirs.src}/css/*.css`).on('change', browserSync.reload);
     browserSync.watch(`${dirs.src}/js/**/*.js`).on('change', browserSync.reload);
+    browserSync.watch(`${__dirname}/helpers/**/*.js`).on('change', browserSync.reload);
+
 });

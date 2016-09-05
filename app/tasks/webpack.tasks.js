@@ -7,7 +7,7 @@ import notify from 'gulp-notify';
 
 const webpack = webpackStream.webpack;
 const dirs = pkg['app-configs'].directories;
-
+const path = require("path");
 
 gulp.task('webpack', function() {
 
@@ -22,7 +22,7 @@ gulp.task('webpack', function() {
         {
           test: /\.hbs/,
           exclude: /(node_modules|bower_components)/,
-          loader: 'handlebars-loader'
+          loader: `handlebars-loader?helperDirs[]=${__dirname}/helpers`
         }
       ]
     },

@@ -5,6 +5,7 @@ import runSequence from 'run-sequence';
 import del from 'del';
 import pkg from './package.json';
 const dirs = pkg['app-configs'].directories;
+const path = require("path");
 
 // Include tasks/ folder
 requireDir('./tasks', {recurse: true});
@@ -24,6 +25,7 @@ gulp.task('watch', () => {
     gulp.watch(`${dirs.src}/**/*.jade`, ["jade"]);
     gulp.watch(`${dirs.src}/js/**/*.js`, ["webpack"]);
     gulp.watch(`${dirs.src}/hbs/**/*.hbs`, ["hbs", "webpack"]);
+    gulp.watch(`${__dirname}/tasks/helpers/**/*.js`, ["webpack"]);
 });
 
 gulp.task('clean', function() {

@@ -68,7 +68,6 @@ socket.onmessage = function(event) {
 
 };
 
-
 new Promise(function(resolve, reject) {
 
     if (!window.WebSocket) {
